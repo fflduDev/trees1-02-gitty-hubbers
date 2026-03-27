@@ -1,4 +1,4 @@
-package tree;
+
 import java.util.ArrayList;
 
 public class GenericTreeNode<E> {
