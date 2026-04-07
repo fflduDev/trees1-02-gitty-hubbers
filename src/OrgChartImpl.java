@@ -1,23 +1,28 @@
 
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
+import java.util.Stack;
+import java.util.Vector;
 
 public class OrgChartImpl implements OrgChart{
 
 	//Employee is your generic 'E'..
 	private List<GenericTreeNode<Employee>> nodes = new ArrayList<>();
-
+	private GenericTreeNode<Employee> root;
 	@Override
 	public void addRoot(Employee e) {
 		// TODO Auto-generated method stub
-		GenericTreeNode<Employee> rootEmployee = new GenericTreeNode<Employee>(e);
-		nodes.add(rootEmployee);
+		root = new GenericTreeNode<Employee>(e);
+		nodes.add(root);
 	}
 
 	@Override
 	public void clear() {
-		// TODO Auto-generated method stub
+		nodes.clear();
+		root = null;
 		
 	}
 
@@ -47,7 +52,30 @@ public class OrgChartImpl implements OrgChart{
 
 	@Override
 	public void showOrgChartDepthFirst() {
-		// TODO Auto-generated method stub
+		// create a stack used to do iterative DFS
+        Stack<GenericTreeNode<Employee>> stack = new Stack<>();
+ 
+        // push the root into the stack
+        stack.push(root);
+ 	    
+        // loop till stack is empty
+        while (!stack.empty())
+        {
+            // Pop a node from the stack
+            GenericTreeNode<Employee> currentNode = stack.pop();
+            System.out.println(currentNode.data);
+ 
+            ArrayList<GenericTreeNode<Employee>> children = currentNode.children;
+            
+            // Visit node
+            // Push the children of node onto stack
+
+            for (int i = children.size() - 1; i >= 0; i--)
+            {
+               stack.push(children.get(i));
+              
+        }
+        }
 		
 	}
 
