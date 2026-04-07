@@ -1,3 +1,4 @@
+// making a change
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -6,15 +7,11 @@ import java.util.Stack;
 
 public class OrgChartImpl implements OrgChart {
 
-    // Employee is your generic 'E'
     private List<GenericTreeNode<Employee>> nodes = new ArrayList<>();
     private GenericTreeNode<Employee> root;
 
     @Override
     public void addRoot(Employee e) {
-        // clear old tree if you only want one root total
-        clear();
-
         root = new GenericTreeNode<Employee>(e);
         nodes.add(root);
     }
@@ -27,69 +24,52 @@ public class OrgChartImpl implements OrgChart {
 
     @Override
     public void addDirectReport(Employee manager, Employee newPerson) {
-        GenericTreeNode<Employee> managerNode = findNode(manager);
-
-        if (managerNode == null) {
-            return;
+        for (GenericTreeNode<Employee> currentEmployee : nodes) {
+            if (currentEmployee.data.equals(manager)) {
+                GenericTreeNode<Employee> newE = new GenericTreeNode<Employee>(newPerson);
+                currentEmployee.addChild(newE);
+                nodes.add(newE);
+                break;
+            }
         }
-
-        GenericTreeNode<Employee> newEmployeeNode = new GenericTreeNode<Employee>(newPerson);
-        managerNode.addChild(newEmployeeNode);
-        nodes.add(newEmployeeNode);
     }
 
     @Override
     public void removeEmployee(Employee firedPerson) {
-        if (root == null) {
-            return;
-        }
 
-        // case 1: removing the root
+        if (root == null) return;
+
         if (root.data.equals(firedPerson)) {
-            if (root.children.isEmpty()) {
-                clear();
-                return;
-            }
-
-            GenericTreeNode<Employee> oldRoot = root;
-
-            // promote first child to new root
-            GenericTreeNode<Employee> newRoot = oldRoot.children.remove(0);
-
-            // move remaining old root children under new root
-            for (GenericTreeNode<Employee> child : oldRoot.children) {
-                newRoot.addChild(child);
-            }
-
-            root = newRoot;
-            nodes.remove(oldRoot);
+            clear();
             return;
         }
 
-        // case 2: removing a non-root employee
-        GenericTreeNode<Employee> supervisor = findSupervisor(firedPerson);
-        GenericTreeNode<Employee> firedNode = findNode(firedPerson);
+        GenericTreeNode<Employee> target = null;
+        GenericTreeNode<Employee> parent = null;
 
-        if (supervisor == null || firedNode == null) {
-            return;
+        for (GenericTreeNode<Employee> node : nodes) {
+            for (GenericTreeNode<Employee> child : node.children) {
+                if (child.data.equals(firedPerson)) {
+                    target = child;
+                    parent = node;
+                    break;
+                }
+            }
         }
 
-        // remove fired employee from supervisor's child list
-        supervisor.removeChild(firedPerson);
+        if (target == null) return;
 
-        // reassign fired employee's children to supervisor
-        for (GenericTreeNode<Employee> child : firedNode.children) {
-            supervisor.addChild(child);
+        for (GenericTreeNode<Employee> child : target.children) {
+            parent.addChild(child);
         }
 
-        nodes.remove(firedNode);
+        parent.children.remove(target);
+        nodes.remove(target);
     }
 
     @Override
     public void showOrgChartDepthFirst() {
-        if (root == null) {
-            return;
-        }
+        if (root == null) return;
 
         Stack<GenericTreeNode<Employee>> stack = new Stack<>();
         stack.push(root);
@@ -108,40 +88,18 @@ public class OrgChartImpl implements OrgChart {
 
     @Override
     public void showOrgChartBreadthFirst() {
-        if (root == null) {
-            return;
-        }
+        if (root == null) return;
 
         Queue<GenericTreeNode<Employee>> queue = new LinkedList<>();
         queue.add(root);
 
         while (!queue.isEmpty()) {
-            GenericTreeNode<Employee> currentNode = queue.remove();
-            System.out.println(currentNode.data);
+            GenericTreeNode<Employee> current = queue.remove();
+            System.out.println(current.data);
 
-            for (GenericTreeNode<Employee> child : currentNode.children) {
+            for (GenericTreeNode<Employee> child : current.children) {
                 queue.add(child);
             }
         }
-    }
-
-    private GenericTreeNode<Employee> findNode(Employee employee) {
-        for (GenericTreeNode<Employee> currentNode : nodes) {
-            if (currentNode.data.equals(employee)) {
-                return currentNode;
-            }
-        }
-        return null;
-    }
-
-    private GenericTreeNode<Employee> findSupervisor(Employee employee) {
-        for (GenericTreeNode<Employee> currentNode : nodes) {
-            for (GenericTreeNode<Employee> child : currentNode.children) {
-                if (child.data.equals(employee)) {
-                    return currentNode;
-                }
-            }
-        }
-        return null;
     }
 }
